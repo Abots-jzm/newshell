@@ -29,6 +29,15 @@ fn main() {
 
     let mut should_exit = false;
 
+    let r = ctrlc::set_handler(move || {
+        println!("\nExiting shell...");
+        std::process::exit(0);
+    });
+
+    if let Err(err) = r {
+        eprintln!("Error setting Ctrl+C handler: {}", err);
+    }
+
     while !should_exit {
         match mode {
             Mode::Interactive => {
@@ -80,5 +89,13 @@ fn main() {
 }
 
 fn tokenize_input(input: &str) -> Vec<Vec<&str>> {
-    input.split(';').map(|x| x.split(' ').collect()).collect()
+    input
+        .split(';')
+        .map(|x| {
+            x.split(' ')
+                .filter(|s| !s.is_empty())
+                .map(|s| s.trim())
+                .collect()
+        })
+        .collect()
 }
